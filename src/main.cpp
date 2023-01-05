@@ -3,6 +3,13 @@
 #include <Adafruit_TestBed.h>
 #include <Adafruit_ST7789.h> 
 #include <Fonts/FreeSans12pt7b.h>
+#define FASTLED_INTERNAL
+#include <FastLED.h>
+
+#define NUM_LEDS  10
+#define LED_PIN   5
+
+CRGB g_LEDs[NUM_LEDS] = {0};      //buffer for LastLED
 
 //setup the Neopixel connection
 extern Adafruit_TestBed TB;
@@ -13,10 +20,52 @@ Adafruit_ST7789 display = Adafruit_ST7789(TFT_CS, TFT_DC, TFT_RST);
 //create a canvas for the display
 GFXcanvas16 canvas(240, 135);
 
+uint8_t j = 0;
+// FramsPerSecond
+//
+// Tracks a weighted average for FPS
+double FramesPerSecond(double seconds)
+{
+  static double framesPerSecond;
+
+  framesPerSecond = (framesPerSecond * .9 + (1.0 / seconds * .1));
+  return framesPerSecond;
+}
+
+// DrawScreen
+//
+// Updates the screen
+void DrawScreen(int val)
+{
+  canvas.flush();
+  canvas.fillScreen(ST77XX_BLACK);
+  canvas.setCursor(0, 25);
+  canvas.setTextColor(ST77XX_RED);
+  canvas.println("Stringer's Feather TFT");
+  canvas.setTextColor(ST77XX_YELLOW);
+  canvas.println("Adafruit ESP32-S3TFT");
+  canvas.setTextColor(ST77XX_GREEN); 
+  canvas.print("Neopixel val: ");
+  canvas.setTextColor(ST77XX_WHITE);
+  canvas.printf("%d\n",j);
+  canvas.setTextColor(ST77XX_BLUE); 
+  canvas.print("FPS: ");
+  canvas.setTextColor(ST77XX_WHITE);
+  canvas.printf("%03d",val);
+  canvas.print(" LEDP:");
+  //canvas.printf("%02d",LED_PIN);
+
+  display.drawRGBBitmap(0, 0, canvas.getBuffer(), 240, 135);
+  TB.setColor(TB.Wheel(j++));
+  delay(50);
+  }
+
 void setup() 
 {
-  Serial.begin(115200);
-  Serial.println("Hello, world!");
+  //Serial.begin(115200);
+  //Serial.println("Hello, world!");
+  //power the external 
+  //pinMode(LED_PIN, OUTPUT);
 
   pinMode(NEOPIXEL_POWER, OUTPUT);
   digitalWrite(NEOPIXEL_POWER, HIGH);
@@ -25,39 +74,49 @@ void setup()
   TB.begin();
   TB.setColor(WHITE);
 
+
   display.init(135, 240);           // Init ST7789 240x135
   display.setRotation(3);
   canvas.setFont(&FreeSans12pt7b);
   canvas.setTextColor(ST77XX_WHITE); 
   pinMode(TFT_BACKLITE, OUTPUT);
   digitalWrite(TFT_BACKLITE, HIGH);
+  
+  CRGB ledColors[] = {
+                        CRGB::Red,
+                        CRGB::Orange,
+                        CRGB::Yellow,
+                        CRGB::Green,
+                        CRGB::Aqua,
+                        CRGB::Blue,
+                        CRGB::Indigo,
+                        CRGB::Violet };
+  
+
+//FastLED.addLeds<WS2812B, GPIO_NUM_5, GRB>(g_LEDs, ) ;        //Init the strip
+//FastLED.setBrightness(16);
+  //FastLED.show();
+//FastLED.clearData();
 }
 
-uint8_t j = 0;
 
-void loop() {
-  if (j % 5 == 0) {
-    canvas.fillScreen(ST77XX_BLACK);
-    canvas.setCursor(0, 25);
-    canvas.setTextColor(ST77XX_RED);
-    canvas.println("Stringer's Feather TFT");
-    canvas.setTextColor(ST77XX_YELLOW);
-    canvas.println("ESP32-S3 TFT");
-    canvas.setTextColor(ST77XX_GREEN); 
-    canvas.print("Neopixel");
-    canvas.setTextColor(ST77XX_WHITE);
-    canvas.printf(" val %d\n",j);
-    canvas.setTextColor(ST77XX_BLUE); 
-    canvas.print("Power: ");
-    canvas.setTextColor(ST77XX_WHITE);
-    canvas.println("");
+void loop() 
+{
+  
+  int fps = 0;
+  for (;;)
+  {
+    double dStart = millis() / 1000.0;
+    DrawScreen(fps);
+    double dEnd = millis() / 1000.0;
+     fps = FramesPerSecond(dEnd - dStart);
 
-    display.drawRGBBitmap(0, 0, canvas.getBuffer(), 240, 135);
   }
-  TB.setColor(TB.Wheel(j++));
-  //Serial.println(j);
-  delay(50);
-  if (j > 255) {
-    j=0;
-  }
+  //Handle external LEDs
+  //g_LEDs[0] = CRGB::Red;
+  //FastLED.show();
+  
+
+    //Serial.println(j);
+  
 }
