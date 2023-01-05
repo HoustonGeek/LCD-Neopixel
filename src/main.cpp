@@ -93,9 +93,9 @@ void setup()
                         CRGB::Violet };
   
 
-//FastLED.addLeds<WS2812B, GPIO_NUM_5, GRB>(g_LEDs, ) ;        //Init the strip
-//FastLED.setBrightness(16);
-  //FastLED.show();
+FastLED.addLeds<WS2812B, GPIO_NUM_5, GRB>(ledColors, NUM_LEDS ) ;        //Init the strip
+FastLED.setBrightness(20);
+FastLED.show();
 //FastLED.clearData();
 }
 
