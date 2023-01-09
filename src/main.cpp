@@ -1,3 +1,16 @@
+//+----------------------------------------------------------------------
+//
+// Arduino LEDs
+//
+// File: main.cpp
+//
+// Description:
+//
+//  Draws effects on an addressable RGB strip and prints stats to the TFT display
+//
+// History:       Jan-09-2023     mstringer   created
+
+
 #include <Arduino.h>
 #include <Adafruit_NeoPixel.h>
 #include <Adafruit_TestBed.h>
@@ -93,9 +106,9 @@ void setup()
                         CRGB::Violet };
   
 
-FastLED.addLeds<WS2812B, GPIO_NUM_5, GRB>(ledColors, NUM_LEDS ) ;        //Init the strip
-FastLED.setBrightness(20);
-FastLED.show();
+//FastLED.addLeds<WS2812B, GPIO_NUM_5, GRB>(ledColors, NUM_LEDS ) ;        //Init the strip
+//FastLED.setBrightness(20);
+//FastLED.show();
 //FastLED.clearData();
 }
 
