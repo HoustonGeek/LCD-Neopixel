@@ -8,7 +8,7 @@
 //
 //  Draws effects on an addressable RGB strip and prints stats to the TFT display
 //
-// History:       Jan-09-2023     mstringer   created
+// History:       Jan-09-2023     mstringer   add FASTLed code
 //
 //+-----------------------------------------------------------------------------------
 
