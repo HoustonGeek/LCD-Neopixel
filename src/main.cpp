@@ -1,4 +1,4 @@
-//+----------------------------------------------------------------------
+//+------------------------------------------------------------------------------------
 //
 // Arduino LEDs
 //
@@ -9,17 +9,18 @@
 //  Draws effects on an addressable RGB strip and prints stats to the TFT display
 //
 // History:       Jan-09-2023     mstringer   created
-
+//
+//+-----------------------------------------------------------------------------------
 
 #include <Arduino.h>
 #include <Adafruit_NeoPixel.h>
 #include <Adafruit_TestBed.h>
 #include <Adafruit_ST7789.h> 
-#include <Fonts/FreeSans12pt7b.h>
+#include <Fonts/FreeSans9pt7b.h>
 #define FASTLED_INTERNAL
 #include <FastLED.h>
 
-#define NUM_LEDS  10
+#define NUM_LEDS  30
 #define LED_PIN   5
 
 CRGB g_LEDs[NUM_LEDS] = {0};      //buffer for LastLED
@@ -65,8 +66,10 @@ void DrawScreen(int val)
   canvas.print("FPS: ");
   canvas.setTextColor(ST77XX_WHITE);
   canvas.printf("%03d",val);
-  canvas.print(" LEDP:");
-  //canvas.printf("%02d",LED_PIN);
+  canvas.print(" LEDs: P");
+  canvas.printf("%02d",LED_PIN);
+  canvas.print(" #:");
+  canvas.printf("%02d",NUM_LEDS);
 
   display.drawRGBBitmap(0, 0, canvas.getBuffer(), 240, 135);
   TB.setColor(TB.Wheel(j++));
@@ -95,41 +98,34 @@ void setup()
   pinMode(TFT_BACKLITE, OUTPUT);
   digitalWrite(TFT_BACKLITE, HIGH);
   
-  CRGB ledColors[] = {
-                        CRGB::Red,
-                        CRGB::Orange,
-                        CRGB::Yellow,
-                        CRGB::Green,
-                        CRGB::Aqua,
-                        CRGB::Blue,
-                        CRGB::Indigo,
-                        CRGB::Violet };
-  
-
-//FastLED.addLeds<WS2812B, GPIO_NUM_5, GRB>(ledColors, NUM_LEDS ) ;        //Init the strip
-//FastLED.setBrightness(20);
-//FastLED.show();
-//FastLED.clearData();
+  FastLED.addLeds<WS2812B, LED_PIN, GRB>(g_LEDs, NUM_LEDS);   //Add LED sctrip
 }
 
 
 void loop() 
 {
   
-  int fps = 0;
+  double fps = 0;
+
+  uint8_t initialHue = 0;
+  const uint8_t deltaHue = 16;
+  const uint8_t hueDensity = 4;
+
   for (;;)
   {
+    //Handle FPS
     double dStart = millis() / 1000.0;
+
+    //Draw screen
     DrawScreen(fps);
+
+    //LED code from here
+    fill_rainbow(g_LEDs, NUM_LEDS, initialHue += hueDensity, deltaHue);
+    FastLED.show();
+
+
     double dEnd = millis() / 1000.0;
-     fps = FramesPerSecond(dEnd - dStart);
+    fps = FramesPerSecond(dEnd - dStart);
 
   }
-  //Handle external LEDs
-  //g_LEDs[0] = CRGB::Red;
-  //FastLED.show();
-  
-
-    //Serial.println(j);
-  
 }
